@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrackMyUni - ИИ-Рекомендации</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary-color: #5a5ce6; 
+            --text-dark: #111; 
+            --bg-light: #f9fafb; 
+            --card-bg: #fff;
+        }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-light); color: var(--text-dark); margin: 0; padding: 0; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        
+        /* Header */
+        header { background: #fff; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); text-decoration: none; }
+        .logo span { color: var(--primary-color); }
+
+        /* Form Section */
+        .form-section { background: var(--card-bg); padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 3rem; }
+        .form-title { font-size: 2rem; margin-bottom: 1.5rem; text-align: center; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #6b7280; }
+        .form-control { width: 100%; padding: 0.8rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-family: inherit; font-size: 1rem; }
+        .checkbox-group { display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem; }
+        
+        .btn-submit { 
+            background: var(--primary-color); color: #fff; border: none; padding: 1rem 2rem; 
+            border-radius: 50px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1.1rem;
+            transition: transform 0.2s; margin-top: 1rem;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(90, 92, 230, 0.3); }
+
+        /* Results Section */
+        .results-section { display: none; }
+        .section-header { font-size: 1.8rem; margin-bottom: 1.5rem; border-left: 5px solid var(--primary-color); padding-left: 1rem; }
+        
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        .card { 
+            background: #fff; padding: 1.5rem; border-radius: 1rem; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;
+            position: relative; overflow: hidden;
+        }
+        .card-badge { 
+            position: absolute; top: 1rem; right: 1rem; 
+            background: #eef2ff; color: var(--primary-color); 
+            padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+        }
+        .card h3 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.3rem; }
+        .card p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; }
+        .match-score { font-weight: 700; color: #10b981; margin-bottom: 0.5rem; display: block; }
+        
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <a href="index.html" class="logo">Track<span>My</span>Uni</a>
+        <nav>
+            <a href="index.html" style="text-decoration: none; color: var(--text-dark); margin-right: 1rem;">Главная</a>
+            <a href="recommendations.html" style="text-decoration: none; color: var(--primary-color); font-weight: 600;">Рекомендации</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <!-- Форма -->
+    <section class="form-section" id="surveyForm">
+        <h2 class="form-title">Рассчитай свой путь в вуз</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Твой класс</label>
+                <select id="grade" class="form-control">
+                    <option value="9">9 класс (ОГЭ)</option>
+                    <option value="10">10 класс</option>
+                    <option value="11" selected>11 класс (ЕГЭ)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Интересующее направление</label>
+                <select id="interest" class="form-control">
+                    <option value="IT">IT и Программирование</option>
+                    <option value="Econ">Экономика и Управление</option>
+                    <option value="Hum">Гуманитарные науки / Право</option>
+                    <option value="Eng">Инженерия и Физика</option>
+                    <option value="Med">Медицина и Биология</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Предметы ЕГЭ (выбери 3)</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sub_math" value="Математика"> <label for="sub_math">Математика</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sub_rus" value="Русский"> <label for="sub_rus">Русский</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sub_phys" value="Физика"> <label for="sub_phys">Физика</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sub_inf" value="Информатика"> <label for="sub_inf">Информатика</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sub_soc" value="Обществознание"> <label for="sub_soc">Обществознание</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sub_hist" value="История"> <label for="sub_hist">История</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Сумма баллов пробников (или планируемая)</label>
+                <input type="number" id="totalScore" class="form-control" placeholder="Например: 240">
+            </div>
+            <div class="form-group">
+                <label>Дополнительно</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="hasVolunteer"> <label for="hasVolunteer">Есть волонтерская книжка</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="hasOlympiad"> <label for="hasOlympiad">Участвовал в олимпиадах</label>
+                </div>
+            </div>
+        </div>
+        <button class="btn-submit" onclick="calculateRecommendations()">Получить рекомендации</button>
+    </section>
+
+    <!-- Результаты -->
+    <section class="results-section" id="results">
+        <h2 class="section-header">🎓 Твои идеальные вузы</h2>
+        <div class="cards-grid" id="uniResults"></div>
+
+        <h2 class="section-header">🏆 Олимпиады для твоих предметов</h2>
+        <div class="cards-grid" id="olympResults"></div>
+
+        <h2 class="section-header">🤝 Волонтерство для доп. баллов</h2>
+        <div class="cards-grid" id="volResults"></div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="btn-submit" style="width: auto; background: #fff; color: var(--text-dark); border: 1px solid #e5e7eb;" onclick="location.reload()">Пройти заново</button>
+        </div>
+    </section>
+</main>
+
+<!-- Подключаем базу данных -->
+<script src="data.js"></script>
+
+<script>
+    function calculateRecommendations() {
+        // 1. Сбор данных из формы
+        const grade = document.getElementById('grade').value;
+        const interest = document.getElementById('interest').value;
+        const score = parseInt(document.getElementById('totalScore').value) || 0;
+        const hasVolunteer = document.getElementById('hasVolunteer').checked;
+        const hasOlympiad = document.getElementById('hasOlympiad').checked;
+
+        // Сбор выбранных предметов
+        const userSubjects = [];
+        if(document.getElementById('sub_math').checked) userSubjects.push("Математика");
+        if(document.getElementById('sub_rus').checked) userSubjects.push("Русский");
+        if(document.getElementById('sub_phys').checked) userSubjects.push("Физика");
+        if(document.getElementById('sub_inf').checked) userSubjects.push("Информатика");
+        if(document.getElementById('sub_soc').checked) userSubjects.push("Обществознание");
+        if(document.getElementById('sub_hist').checked) userSubjects.push("История");
+
+        // 2. Алгоритм подбора ВУЗОВ (Scoring)
+        let recommendedUnis = universitiesData.map(uni => {
+            let matchScore = 0;
+            let matchedPrograms = [];
+
+            uni.programs.forEach(prog => {
+                // Приоритет 1: Совпадение предметов (вес 40%)
+                // Считаем сколько предметов пользователя входит в требуемые для программы
+                const commonSubjects = prog.subjects.filter(s => userSubjects.includes(s));
+                const subjectMatch = commonSubjects.length / prog.subjects.length; 
+                
+                // Приоритет 2: Реальность поступления по баллам (вес 40%)
+                // Если баллов хватает или почти хватает
+                let scoreMatch = 0;
+                if (score >= prog.minScore) scoreMatch = 1; // Отличный шанс
+                else if (score >= prog.minScore - 20) scoreMatch = 0.7; // Есть шанс
+                else if (score >= prog.minScore - 40) scoreMatch = 0.3; // Рискованно
+                
+                // Приоритет 3: Льготы (вес 20%)
+                let bonusMatch = 0;
+                if (hasVolunteer && uni.features.some(f => f.includes("Волонтерство"))) bonusMatch += 0.1;
+                if (hasOlympiad && uni.features.some(f => f.includes("БВИ"))) bonusMatch += 0.1;
+
+                // Итоговый вес программы
+                const programWeight = (subjectMatch * 0.4) + (scoreMatch * 0.4) + (bonusMatch * 0.2);
+                
+                if (programWeight > 0.3) { // Порог отсечения
+                    matchedPrograms.push({
+                        name: prog.name,
+                        weight: programWeight,
+                        minScore: prog.minScore
+                    });
+                }
+            });
+
+            // Средний вес всех подходящих программ вуза
+            if (matchedPrograms.length > 0) {
+                const avgWeight = matchedPrograms.reduce((a, b) => a + b.weight, 0) / matchedPrograms.length;
+                return { ...uni, score: avgWeight, programs: matchedPrograms };
+            }
+            return null;
+        }).filter(item => item !== null).sort((a, b) => b.score - a.score); // Сортировка по убыванию релевантности
+
+        // 3. Алгоритм подбора Олимпиад
+        let recommendedOlympiads = olympiadsData.filter(olymp => {
+            // Показываем олимпиады, где есть хотя бы один предмет пользователя
+            return olymp.subjects.some(s => userSubjects.includes(s));
+        });
+
+        // 4. Алгоритм подбора Волонтерства
+        let recommendedVolunteering = volunteeringData; // Показываем все, так как они дают баллы во многие вузы
+        if (!hasVolunteer) {
+            // Если книжки нет, помечаем как "Начни здесь"
+        }
+
+        // 5. Вывод результатов
+        renderResults(recommendedUnis, recommendedOlympiads, recommendedVolunteering, userSubjects);
+    }
+
+    function renderResults(unis, olymps, vols, subjects) {
+        document.getElementById('surveyForm').style.display = 'none';
+        document.getElementById('results').style.display = 'block';
+
+        // Рендер ВУЗов
+        const uniContainer = document.getElementById('uniResults');
+        uniContainer.innerHTML = unis.slice(0, 6).map(uni => `
+            <div class="card">
+                <span class="card-badge">Совпадение ${Math.round(uni.score * 100)}%</span>
+                <h3>${uni.name}</h3>
+                <p style="font-size: 0.9rem; color: #9ca3af;"><i class="fa-solid fa-location-dot"></i> ${uni.city}</p>
+                <div style="margin-top: 1rem;">
+                    <strong>Подходящие программы:</strong>
+                    <ul style="padding-left: 1.2rem; margin-top: 0.5rem; font-size: 0.9rem;">
+                        ${uni.programs.slice(0, 3).map(p => `<li>${p.name} (проходной ~${p.minScore})</li>`).join('')}
+                    </ul>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.85rem;"><i class="fa-solid fa-star" style="color: gold;"></i> ${uni.features.join(', ')}</p>
+            </div>
+        `).join('');
+
+        // Рендер Олимпиад
+        const olympContainer = document.getElementById('olympResults');
+        olympContainer.innerHTML = olymps.map(olymp => `
+            <div class="card">
+                <span class="card-badge">${olymp.level}</span>
+                <h3>${olymp.name}</h3>
+                <p><strong>Предметы:</strong> ${olymp.subjects.join(', ')}</p>
+                <p><strong>Льгота:</strong> ${olymp.benefit}</p>
+                <p style="font-size: 0.9rem; color: #ef4444;"><i class="fa-regular fa-clock"></i> ${olymp.deadline}</p>
+            </div>
+        `).join('');
+
+        // Рендер Волонтерства
+        const volContainer = document.getElementById('volResults');
+        volContainer.innerHTML = vols.map(vol => `
+            <div class="card">
+                <h3>${vol.name}</h3>
+                <p><strong>Направление:</strong> ${vol.tags.join(', ')}</p>
+                <p><strong>Баллы в вуз:</strong> ${vol.benefit}</p>
+                <a href="${vol.link}" target="_blank" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Перейти на сайт &rarr;</a>
+            </div>
+        `).join('');
+    }
+</script>
+
+</body>
+</html>
